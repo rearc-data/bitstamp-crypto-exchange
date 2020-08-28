@@ -3,6 +3,8 @@ import boto3
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 from multiprocessing.dummy import Pool
+import ssl
+
 
 
 def data_to_s3(frmt):
@@ -10,6 +12,9 @@ def data_to_s3(frmt):
     # otherwise downloads and uploads to s3
 
     source_dataset_url = 'https://www.cryptodatadownload.com/cdd/Bitstamp_'
+    if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
+    getattr(ssl, '_create_unverified_context', None)):
+        ssl._create_default_https_context = ssl._create_unverified_context
 
     try:
         response = urlopen(source_dataset_url + frmt)
@@ -23,7 +28,7 @@ def data_to_s3(frmt):
     else:
         data_set_name = os.environ['DATA_SET_NAME']
         filename = data_set_name + frmt
-        file_location = '/tmp/' + filename 
+        file_location = '/tmp/' + filename
 
         with open(file_location, 'wb') as f:
             f.write(response.read())
@@ -66,7 +71,6 @@ def source_dataset():
         'ETHEUR_1h.csv',
         'LTCEUR_1h.csv',
         'LTCBTC_1h.csv'
-
 
     ]
 
